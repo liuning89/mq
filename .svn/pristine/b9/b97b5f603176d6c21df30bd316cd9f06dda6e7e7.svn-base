@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo
+	http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	<!-- 提供方应用信息，用于计算依赖关系 -->
+
+	<context:component-scan base-package="com.wy.mq" />
+
+	<dubbo:application name="mq-example" />
+	<dubbo:protocol name="dubbo" port="-1" />
+	<dubbo:registry address="${dubbo.registry.url}" check="false" group="${dubbo.registry.group}" id="mqProvider" timeout="30000"/>
+
+	<dubbo:service interface="com.wy.mq.consumer.IMqConsumerService" ref="userLogin" group="user" version="login" registry="mqProvider"/>
+	<dubbo:service interface="com.wy.mq.consumer.IMqConsumerService" ref="userNew" group="user" version="new" registry="mqProvider" />
+	<dubbo:service interface="com.wy.mq.consumer.IMqConsumerService" ref="userShortMsg" group="user" version="shortMsg" registry="mqProvider" />
+
+
+
+	<dubbo:reference interface="com.wy.mq.producer.IMqProducerService" registry="mqProvider" id="mqProducerService" check="false"/>
+	<dubbo:reference interface="com.wy.mq.service.IMqConfigService" registry="mqProvider" id="mqConfigService" check="false"/>
+	
+	<dubbo:reference interface="com.wy.mq.task.service.ILoadMqConfigService" registry="mqProvider" id="loadMqConfigService" check="false"/>
+	<dubbo:reference interface="com.wy.mq.task.service.IReConsumerService" registry="mqProvider" id="reConsumerService" check="false"/>
+	<dubbo:reference interface="com.wy.mq.task.service.IRetrySendService" registry="mqProvider" id="retrySendService" check="false"/>
+
+	<bean id="producer" class="com.wy.mq.producer.MqProducerExample" init-method="start" />
+<!-- 	<bean id="subUnsub" class="com.wy.mq.producer.MqSubUnsubExample" init-method="start" /> -->
+	<bean id="TaskExample" class="com.wy.mq.producer.TaskExample" init-method="start"/>
+</beans>

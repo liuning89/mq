@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo
+	http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<context:component-scan base-package="com.wy.mq"/>
+	
+    <dubbo:application name="mq-provider"/>
+    <dubbo:protocol name="dubbo" port="-1" />
+    <dubbo:registry address="${dubbo.registry.url}" check="false" group="${dubbo.registry.group}" id="mqProvider" />
+    
+    
+    <dubbo:service interface="com.wy.mq.task.service.IRetrySendService" ref="retrySendService" registry="mqProvider" timeout="30000"/>
+ 	<dubbo:service interface="com.wy.mq.producer.IMqProducerService" ref="mqProducerService"  registry="mqProvider" timeout="30000"/>
+ 	<dubbo:service interface="com.wy.mq.consumer.IMqConsumerService" ref="defaultConsumer"  registry="mqProvider" group="default" version="default" timeout="30000"/>
+ 
+ 
+    <dubbo:service interface="com.wy.mq.service.IMqConfigService" ref="mqConfigService" registry="mqProvider" timeout="30000"/>
+    <dubbo:service interface="com.wy.mq.service.IMqDbConsumerService" ref="mqDbConsumerService" registry="mqProvider" timeout="30000"/>
+
+    <dubbo:service interface="com.wy.mq.task.service.ILoadMqConfigService" ref="loadMqConfigService" registry="mqProvider" timeout="30000"/>
+    <dubbo:service interface="com.wy.mq.task.service.IReConsumerService" ref="reConsumerService" registry="mqProvider" timeout="30000"/>
+ 
+</beans>

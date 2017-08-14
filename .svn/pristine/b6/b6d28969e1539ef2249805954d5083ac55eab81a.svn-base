@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wy.mq.dao.MqConfigDao">
+	
+	<select id="queryConfig" resultType="com.wy.mq.dto.MqConfig">
+		select
+			*
+		from 
+			tt_mq_config
+	</select>
+	
+	<select id="selectTags" resultType="com.wy.mq.dto.MqConfig">
+		SELECT DISTINCT topic,tag FROM tt_mq_config
+	</select>
+	
+	<insert id="save" parameterType="com.wy.mq.dto.MqConfig">
+		INSERT INTO `tt_mq_config` (
+		  `id`,
+		  `clazz`,
+		  `application`,
+		  `registry`,
+		  `registryGroup`,
+		  `topic`,
+		  `tag`,
+		  `group`,
+		  `version`,
+		  `createTime`,
+		  `updateTime`,
+		  `remark`
+		) 
+		VALUES
+		  (
+		    #{id},
+		    'com.wy.mq.consumer.IMqConsumerService',
+		    #{application},
+		    #{registry},
+		    #{registryGroup},
+		    #{topic},
+		    #{tag},
+		    #{group},
+		    #{version},
+		    now(),
+		    now(),
+		    #{remark}
+		  )
+	</insert>
+
+	<delete id="remove" parameterType="com.wy.mq.dto.MqConfig">
+		delete from 
+			tt_mq_config
+		where
+			topic=#{topic} and
+			tag=#{tag} and
+			registryGroup=#{registryGroup} and
+			`group`=#{group} and
+			`version`=#{version}
+	</delete>
+</mapper>

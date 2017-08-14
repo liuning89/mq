@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo
+	http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    
+    <dubbo:protocol name="dubbo" port="-1" />
+    
+    <dubbo:registry address="${dubbo.idworker.registry.url}" check="false" group="${dubbo.idworker.registry.group}" id="idWorkerAll" />
+    <!-- id工作机 -->
+    <dubbo:reference interface="com.wy.common.api.IdWorker" id="idWorker" check="false" registry="idWorkerAll"/>
+    
+    
+    <dubbo:registry id="sendRegitry" group="${dubbo.send.group}" check="false" address="${dubbo.send.address}" file="dubbo-send-consumer.cache"/>
+    <dubbo:reference id="emailSendService" check="false" registry="sendRegitry" interface="com.wy.email.api.EmailSendService"/>
+    <dubbo:reference id="mobileSendService" check="false" registry="sendRegitry" interface="com.wy.sms.api.MobileSendService"/>
+</beans>

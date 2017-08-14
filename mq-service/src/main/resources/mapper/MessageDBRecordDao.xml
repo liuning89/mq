@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wy.mq.dao.MessageDBRecordDao">
+	<insert id="saveMsgRecord">
+		insert into tt_mq_messagedb_record (
+			id,
+			msg_id,
+			consume_count,
+			status,
+			topic,
+			tag,
+			`key`,
+			body,
+			createTime,
+			updateTime
+		)
+		values
+		(
+			#{id},
+			#{msgId},
+			#{consumeCount},
+			#{status},
+			#{topic},
+			#{tag},
+			#{key},
+			#{body},
+			now(),
+			now()
+		);
+	</insert>
+	<update id="updateMsgRecord">
+		update tt_mq_messagedb_record
+		set
+			msg_id = #{msgId},
+			status = #{status},
+			updateTime=now()
+		where
+			id = #{id};
+	</update>
+
+
+	<select id="queryNewMsgList" resultType="com.wy.mq.dto.MessageDBRecord">
+		select 
+			* 
+		from 
+			tt_mq_messagedb_record 
+		where 
+			(msg_id is null  or msg_id='') and 
+			status=1 and 
+			timestampdiff(minute,createtime,now())>1
+		order by id
+		limit 20
+	</select>
+	
+	<update id="sendOk" parameterType="com.wy.mq.dto.MessageDBRecord">
+		update 
+			tt_mq_messagedb_record
+		set
+			msg_id=#{msgId},
+			status=2,
+			updateTime=now(),
+			retrySendCount=retrySendCount+1
+		where
+			id=#{id} and 
+			status != 3
+		
+	</update>
+	
+	<insert id="saveConsumeDetail">
+		insert into tt_mq_consume_detail(
+			id,
+			message_dbrecord_id,
+			messageid,
+			status,
+			`group`,
+			version,
+			callCount,
+			createTime,
+			updateTime
+		)values(
+			#{id},
+			null,
+			#{messageId},
+			#{status},
+			#{group},
+			#{version},
+			1,
+			now(),
+			now()
+		)
+		on duplicate key update
+			status=#{status},
+			callCount=callCount+1,
+			updateTime=now()  
+	</insert>
+	
+	<update id="doneConsumed">
+		update 
+			tt_mq_messagedb_record
+		set 
+			consume_count=consume_count+1,
+			status=3,
+			updateTime=now()
+		where
+			msg_id=#{messageId}
+	</update>
+
+	<update id="updateCompleteMsg">
+		update 
+			tt_mq_consume_detail
+		set
+			status=2,
+			updateTime=now(),
+			callCount=callCount+1
+		where 
+			messageid=#{messageId} and 
+			group=#{group} and 
+			version=#{version}
+	</update>
+
+
+	
+	<select id="loadFailureConsumerList" resultType="com.wy.mq.dto.ConsumeDetail">
+		<![CDATA[
+		select
+			*
+		from
+			tt_mq_consume_detail
+		where
+			status=3 and
+			timestampdiff(minute,createtime,now())>=1 and
+			timestampdiff(minute,createtime,now())<=5
+		order by id
+		limit 20
+		]]>
+	</select>
+	<select id="loadMessageDBRecord" parameterType="com.wy.mq.dto.ConsumeDetail" resultType="com.wy.mq.dto.MessageDBRecord">
+		select 
+			* 
+		from 
+			tt_mq_messagedb_record 
+		where 
+			msg_id=#{messageId}
+	</select>
+</mapper>

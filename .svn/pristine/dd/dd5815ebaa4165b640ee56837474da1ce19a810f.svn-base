@@ -1,0 +1,4 @@
+dubbo.registry.url=zookeeper://localhost:2181
+dubbo.registry.group=mq-service
+
+logger.level=INFO
